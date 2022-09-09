@@ -1,5 +1,5 @@
 extends Area2D
-
+class_name Ladder
 
 # Declare member variables here. Examples:
 # var a = 2
@@ -14,8 +14,3 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
-
-
-func _on_Spikes_body_entered(body):
-	if body is Player: 
-		get_tree().reload_current_scene()
