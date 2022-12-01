@@ -36,6 +36,10 @@ config/name="Pixel Platformer"
 run/main_scene="res://World.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+SoundPlayer="*res://Sounds/SoundPlayer.tscn"
+
 [display]
 
 window/size/width=320
