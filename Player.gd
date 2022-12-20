@@ -22,6 +22,7 @@ onready var ladderCheck := $LadderCheck
 onready var wallCheck := $WallCheck
 onready var jumpBufferTimer := $JumpBufferTimer
 onready var coyoteJumpTimer := $CoyoteJumpTimer
+onready var remoteTransform2d = $RemoteTransform2D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -32,26 +33,26 @@ func _physics_process(delta):
 	input.x = Input.get_axis("ui_left", "ui_right")
 	input.y = Input.get_axis("ui_up", "ui_down")
 	match state:
-		MOVE: move_state(input)
+		MOVE: move_state(input, delta)
 		CLIMB: climb_state(input)
 		WALL_CLIMB: wall_climb_state(input)
 	
-func move_state(input):
-	if is_on_ladder() and Input.is_action_pressed("ui_up"):
+func move_state(input, delta):
+	if is_on_ladder() and Input.is_action_just_pressed("ui_up"):
 		state = CLIMB
 	
 	if is_climbing_wall() and horizontal_move(input):
 		state = WALL_CLIMB
 	
-	apply_gravity()
+	apply_gravity(delta)
 	if Input.is_action_just_pressed("gravity_flip"):
 		gravity_factor *= -1
 		scale.y = gravity_factor
 	if not horizontal_move(input):
-		apply_friction()
+		apply_friction(delta)
 		animatedSprite.animation = "Idle"
 	else:
-		apply_acceleration(input.x)
+		apply_acceleration(input.x, delta)
 		animatedSprite.animation = "Run"
 		orient_character(input.x > 0)
 	
@@ -66,7 +67,7 @@ func move_state(input):
 		jump_released()
 		double_jump()
 		buffer_jump()
-		fast_fall()
+		fast_fall(delta)
 
 	var was_in_air = not is_on_floor()
 	var was_on_floor = is_on_floor()
@@ -102,7 +103,12 @@ func wall_climb_state(input):
 
 func player_die():
 	SoundPlayer.play_sound(SoundPlayer.OOF)
-	get_tree().reload_current_scene()
+	queue_free()
+	Events.emit_signal("player_died")
+
+func connect_camera(camera):
+	var camera_path = camera.get_path()
+	remoteTransform2d.remote_path = camera_path
 
 func orient_character(facing_right):
 	if facing_right:
@@ -121,18 +127,18 @@ func is_on_ladder():
 	if not collider is Ladder: return false
 	return true
 
-func apply_gravity():
-	velocity.y += moveData.GRAVITY * gravity_factor
+func apply_gravity(delta):
+	velocity.y += moveData.GRAVITY * gravity_factor * delta
 	if gravity_factor > 0:
 		velocity.y = min(velocity.y, moveData.MAX_FALL_SPEED * gravity_factor)
 	else:
 		velocity.y = max(velocity.y, moveData.MAX_FALL_SPEED * gravity_factor)
 
-func apply_friction():
-	velocity.x = move_toward(velocity.x, 0, moveData.FRICTION)
+func apply_friction(delta):
+	velocity.x = move_toward(velocity.x, 0, moveData.FRICTION * delta)
 
-func apply_acceleration(amount):
-	velocity.x = move_toward(velocity.x, moveData.MAX_SPEED * amount, moveData.ACCELERATION)
+func apply_acceleration(amount, delta):
+	velocity.x = move_toward(velocity.x, moveData.MAX_SPEED * amount, moveData.ACCELERATION * delta)
 
 func input_jump():
 	if Input.is_action_just_pressed("ui_up") or buffered_jump:
@@ -166,12 +172,9 @@ func buffer_jump():
 		buffered_jump = true
 		jumpBufferTimer.start()
 
-func fast_fall():
+func fast_fall(delta):
 	if velocity.y != 0:
-		velocity.y += moveData.FAST_FALL_GRAVITY * gravity_factor
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+		velocity.y += moveData.FAST_FALL_GRAVITY * gravity_factor * delta
 
 
 func _on_JumpBufferTimer_timeout():

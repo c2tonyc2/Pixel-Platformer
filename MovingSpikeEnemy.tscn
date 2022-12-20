@@ -83,7 +83,6 @@ shape = SubResource( 2 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "MoveAlongPathLoop"
-playback_speed = 0.0
 anims/MoveAlongPathBounce = SubResource( 3 )
 anims/MoveAlongPathLoop = SubResource( 4 )
 anims/RESET = SubResource( 5 )
