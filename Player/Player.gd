@@ -7,7 +7,7 @@ enum{
 	WALL_CLIMB,
 }
 
-export(Resource) var moveData = preload("res://FastPlayerMovementData.tres") as PlayerMovementData
+export(Resource) var moveData = preload("res://Player/FastPlayerMovementData.tres") as PlayerMovementData
 
 var velocity = Vector2.ZERO
 var state = MOVE
@@ -26,7 +26,7 @@ onready var remoteTransform2d = $RemoteTransform2D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	animatedSprite.frames = load("res://PlayerGreenSkin.tres")
+	animatedSprite.frames = load("res://Player/PlayerGreenSkin.tres")
 
 func _physics_process(delta):
 	var input = Vector2.ZERO
