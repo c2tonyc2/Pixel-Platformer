@@ -16,6 +16,7 @@ var fast_falling = false
 var double_jump = 1
 var buffered_jump = false
 var coyote_jump = false
+var on_door = false
 
 onready var animatedSprite := $AnimatedSprite
 onready var ladderCheck := $LadderCheck
@@ -141,6 +142,7 @@ func apply_acceleration(amount, delta):
 	velocity.x = move_toward(velocity.x, moveData.MAX_SPEED * amount, moveData.ACCELERATION * delta)
 
 func input_jump():
+	if on_door: return
 	if Input.is_action_just_pressed("ui_up") or buffered_jump:
 		SoundPlayer.play_sound(SoundPlayer.JUMP)
 		fast_falling = false
